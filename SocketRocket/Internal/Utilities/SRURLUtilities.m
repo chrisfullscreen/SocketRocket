@@ -55,7 +55,15 @@ extern NSString *_Nullable SRStreamNetworkServiceTypeFromURLRequest(NSURLRequest
             break;
         case NSURLNetworkServiceTypeVoIP: {
             networkServiceType = NSStreamNetworkServiceTypeVoIP;
-            if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_8_3) {
+
+#if defined NSFoundationVersionNumber_iOS_8_3
+            double foundationVersion = NSFoundationVersionNumber_iOS_8_3;
+#elif defined NSFoundationVersionNumber10_10_Max
+            double foundationVersion = NSFoundationVersionNumber10_10_Max;
+#else
+            double foundationVersion = DBL_MAX;
+#endif
+            if (NSFoundationVersionNumber > foundationVersion) {
                 static dispatch_once_t predicate;
                 dispatch_once(&predicate, ^{
                     NSLog(@"SocketRocket: %@ - this service type is deprecated in favor of using PushKit for VoIP control", networkServiceType);
