@@ -432,9 +432,6 @@ NSString *const SRHTTPResponseErrorKey = @"HTTPResponseStatusCode";
 {
     SRDebugLog(@"Connected");
 
-    _secKey = SRBase64EncodedStringFromData(SRRandomData(16));
-    assert([_secKey length] == 24);
-
     CFHTTPMessageRef message = SRHTTPConnectMessageCreate(_urlRequest);
 
     NSData *messageData = CFBridgingRelease(CFHTTPMessageCopySerializedMessage(message));
