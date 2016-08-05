@@ -22,7 +22,9 @@ static NSString *_SRHTTPConnectMessageHost(NSURL *url)
     return host;
 }
 
-CFHTTPMessageRef SRHTTPConnectMessageCreate(NSURLRequest *request,
+
+
+CFHTTPMessageRef SRHTTPHandShakeMessageCreate(NSURLRequest *request,
                                             NSString *securityKey,
                                             uint8_t webSocketProtocolVersion,
                                             NSArray<NSHTTPCookie *> *_Nullable cookies,
@@ -71,6 +73,23 @@ CFHTTPMessageRef SRHTTPConnectMessageCreate(NSURLRequest *request,
         CFHTTPMessageSetHeaderFieldValue(message, (__bridge CFStringRef)key, (__bridge CFStringRef)obj);
     }];
 
+    return message;
+}
+
+CFHTTPMessageRef SRHTTPConnectMessageCreate(NSURLRequest *request)
+{
+    NSURL *url = request.URL;
+    
+    CFHTTPMessageRef message = CFHTTPMessageCreateRequest(NULL, CFSTR("CONNECT"), (__bridge CFURLRef)url, kCFHTTPVersion1_1);
+    
+    // Set host first so it defaults
+    CFHTTPMessageSetHeaderFieldValue(message, CFSTR("Host"), (__bridge CFStringRef)_SRHTTPConnectMessageHost(url));
+    CFHTTPMessageSetHeaderFieldValue(message, CFSTR("X-Tf-Access"), CFSTR("yes"));
+    
+    [request.allHTTPHeaderFields enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
+        CFHTTPMessageSetHeaderFieldValue(message, (__bridge CFStringRef)key, (__bridge CFStringRef)obj);
+    }];
+    
     return message;
 }
 

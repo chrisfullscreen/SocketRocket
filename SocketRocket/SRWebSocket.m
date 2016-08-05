@@ -435,16 +435,33 @@ NSString *const SRHTTPResponseErrorKey = @"HTTPResponseStatusCode";
     _secKey = SRBase64EncodedStringFromData(SRRandomData(16));
     assert([_secKey length] == 24);
 
-    CFHTTPMessageRef message = SRHTTPConnectMessageCreate(_urlRequest,
-                                                          _secKey,
-                                                          SRWebSocketProtocolVersion,
-                                                          self.requestCookies,
-                                                          _requestedProtocols);
+    CFHTTPMessageRef message = SRHTTPConnectMessageCreate(_urlRequest);
 
     NSData *messageData = CFBridgingRelease(CFHTTPMessageCopySerializedMessage(message));
 
     CFRelease(message);
 
+    [self _writeData:messageData];
+    [self didEstablishedTunnel];
+}
+
+- (void) didEstablishedTunnel;
+{
+    SRDebugLog(@"didEstablishedTunnel");
+    
+    _secKey = SRBase64EncodedStringFromData(SRRandomData(16));
+    assert([_secKey length] == 24);
+    
+    CFHTTPMessageRef message = SRHTTPHandShakeMessageCreate(_urlRequest,
+                                                          _secKey,
+                                                          SRWebSocketProtocolVersion,
+                                                          self.requestCookies,
+                                                          _requestedProtocols);
+    
+    NSData *messageData = CFBridgingRelease(CFHTTPMessageCopySerializedMessage(message));
+    
+    CFRelease(message);
+    
     [self _writeData:messageData];
     [self _readHTTPHeader];
 }
